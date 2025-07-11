@@ -1,3 +1,5 @@
+//Update none at 07_11
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path'; // Asegúrate de que path esté importado si no lo está
