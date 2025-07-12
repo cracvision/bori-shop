@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import type { Attraction } from './types';
 import { fetchAttractions } from './services/viatorService';
@@ -25,8 +24,8 @@ const ALL_CATEGORIES = [
     "Combo Tour / Multi-aventura"
 ];
 
-
 const App: React.FC = () => {
+    console.log("App component loaded");
     const [attractions, setAttractions] = useState<Attraction[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -36,16 +35,21 @@ const App: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
+            console.log("Intentando fetchAttractions...");
             const fetchedAttractions = await fetchAttractions();
+            console.log("Fetched attractions:", fetchedAttractions);
             setAttractions(fetchedAttractions);
         } catch (err) {
+            console.error("Error en fetchAttractions:", err);
             setError(err instanceof Error ? err.message : 'Ocurrió un error desconocido.');
         } finally {
             setIsLoading(false);
+            console.log("Loading terminado.");
         }
     }, []);
 
     useEffect(() => {
+        console.log("useEffect de carga se ejecuta.");
         loadAttractions();
     }, [loadAttractions]);
     
@@ -64,6 +68,7 @@ const App: React.FC = () => {
         );
 
     const renderContent = () => {
+        console.log("Renderizando content", { isLoading, error, attractions: attractions.length, filtered: filteredAttractions.length });
         if (isLoading) {
             return <LoadingSpinner />;
         }
@@ -96,20 +101,19 @@ const App: React.FC = () => {
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 text-white p-4 sm:p-8 relative overflow-hidden">
-             {/* Decorative background images */}
+            {/* Decorative background images */}
             <div className="fixed inset-0 z-0 pointer-events-none flex justify-center" aria-hidden="true">
-    <img
-        src="https://static.wixstatic.com/media/86b1c8_aa13c5837d9344b793e3ec2b6f6c8801~mv2.png"
-        alt=""
-        className="w-2/3 md:w-1/2 lg:w-2/5 opacity-20 mix-blend-lighten"
-        style={{
-            objectFit: 'contain',
-            objectPosition: 'center top', 
-            height: '100vh',
-        }}
-    />
-</div>
-
+                <img
+                    src="https://static.wixstatic.com/media/86b1c8_aa13c5837d9344b793e3ec2b6f6c8801~mv2.png"
+                    alt=""
+                    className="w-2/3 md:w-1/2 lg:w-2/5 opacity-20 mix-blend-lighten"
+                    style={{
+                        objectFit: 'contain',
+                        objectPosition: 'center top', 
+                        height: '100vh',
+                    }}
+                />
+            </div>
             <div className="absolute top-0 left-0 w-full h-full bg-black/20 z-0"></div>
             <main className="relative z-10 container mx-auto">
                 <header className="text-center my-12">
