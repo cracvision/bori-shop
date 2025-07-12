@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <!-- ✅ CAMBIO: Ruta relativa para el favicon -->
+    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Borí Shop - Aventuras en Puerto Rico</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,8 +13,6 @@
             -moz-osx-font-smoothing: grayscale;
         }
     </style>
-
-<link rel="stylesheet" href="/index.css">
 <script type="importmap">
 {
   "imports": {
@@ -24,9 +23,12 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/bori-shop/assets/index-BTx0HpLG.js"></script>
+<!-- ✅ CAMBIO: Ruta relativa para el CSS (si lo usas) -->
+<link rel="stylesheet" href="./index.css">
 </head>
 <body class="bg-gray-900">
     <div id="root"></div>
+    <!-- ✅ CAMBIO: Ruta relativa para el script principal -->
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>
