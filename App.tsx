@@ -1,9 +1,30 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import type { Attraction } from './types';
-import { fetchAttractions } from './services/viatorService';
+import React, { useState } from 'react';
 import AttractionCard from './components/AttractionCard';
 import CategoryFilter from './components/CategoryFilter';
 import LoadingSpinner from './components/LoadingSpinner';
+
+// Usa mock data local para evitar el fetch hasta que confirmes que todo se ve bien
+const mockAttractions = [
+    {
+        name: "Excursión de Kayak Bioluminiscente",
+        description: "Vive una experiencia mágica en la bahía bioluminiscente de Fajardo.",
+        city: "Fajardo",
+        image: "https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/cf/c1.jpg",
+        affiliateLink: "#",
+        categories: ["Kayak", "Bioluminiscencia / Bio Bay"],
+        productCode: "EXKAYAK01"
+    },
+    {
+        name: "Tour ATV en El Yunque",
+        description: "Explora la selva tropical en un recorrido lleno de adrenalina.",
+        city: "Río Grande",
+        image: "https://media.tacdn.com/media/attractions-splice-spp-674x446/07/6e/d0/c3.jpg",
+        affiliateLink: "#",
+        categories: ["ATV / UTV / Can-Am", "Senderismo / Hiking"],
+        productCode: "ATVYUNQUE02"
+    }
+    // Puedes añadir más mock data aquí...
+];
 
 const ALL_CATEGORIES = [
     "Kayak",
@@ -25,34 +46,9 @@ const ALL_CATEGORIES = [
 ];
 
 const App: React.FC = () => {
-    console.log("App component loaded");
-    const [attractions, setAttractions] = useState<Attraction[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const [isLoading] = useState<boolean>(false);
 
-    const loadAttractions = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            console.log("Intentando fetchAttractions...");
-            const fetchedAttractions = await fetchAttractions();
-            console.log("Fetched attractions:", fetchedAttractions);
-            setAttractions(fetchedAttractions);
-        } catch (err) {
-            console.error("Error en fetchAttractions:", err);
-            setError(err instanceof Error ? err.message : 'Ocurrió un error desconocido.');
-        } finally {
-            setIsLoading(false);
-            console.log("Loading terminado.");
-        }
-    }, []);
-
-    useEffect(() => {
-        console.log("useEffect de carga se ejecuta.");
-        loadAttractions();
-    }, [loadAttractions]);
-    
     const handleCategoryChange = (category: string) => {
         setSelectedCategories(prev =>
             prev.includes(category)
@@ -62,26 +58,14 @@ const App: React.FC = () => {
     };
 
     const filteredAttractions = selectedCategories.length === 0
-        ? attractions
-        : attractions.filter(attraction =>
+        ? mockAttractions
+        : mockAttractions.filter(attraction =>
             attraction.categories && attraction.categories.some(cat => selectedCategories.includes(cat))
         );
 
     const renderContent = () => {
-        console.log("Renderizando content", { isLoading, error, attractions: attractions.length, filtered: filteredAttractions.length });
         if (isLoading) {
             return <LoadingSpinner />;
-        }
-        if (error) {
-            return (
-                <div className="text-center py-10 bg-red-900/50 text-red-300 rounded-lg p-6">
-                    <p className="text-2xl font-bold mb-2">¡Ups! Algo salió mal.</p>
-                    <p className="mb-4">{error}</p>
-                    <p className="text-sm text-red-200">
-                        No pudimos cargar los tours desde nuestro proveedor. Esto puede deberse a un problema de red o un problema temporal con la API de Viator. Hemos cargado datos de muestra para que puedas seguir explorando.
-                    </p>
-                </div>
-            );
         }
         if (filteredAttractions.length > 0) {
             return (
@@ -101,7 +85,6 @@ const App: React.FC = () => {
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 text-white p-4 sm:p-8 relative overflow-hidden">
-            {/* Decorative background images */}
             <div className="fixed inset-0 z-0 pointer-events-none flex justify-center" aria-hidden="true">
                 <img
                     src="https://static.wixstatic.com/media/86b1c8_aa13c5837d9344b793e3ec2b6f6c8801~mv2.png"
@@ -109,7 +92,7 @@ const App: React.FC = () => {
                     className="w-2/3 md:w-1/2 lg:w-2/5 opacity-20 mix-blend-lighten"
                     style={{
                         objectFit: 'contain',
-                        objectPosition: 'center top', 
+                        objectPosition: 'center top',
                         height: '100vh',
                     }}
                 />
@@ -149,3 +132,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

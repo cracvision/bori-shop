@@ -1,8 +1,13 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // Importante para que todas las rutas funcionen en Vercel en la raíz
-});
+  base: '/',  // ¡Crítico para Vercel!
+  build: {
+    outDir: 'dist',      // Vercel espera esta carpeta
+    assetsDir: 'assets', // Default, pero explícito por claridad
+    emptyOutDir: true,
+  }
+})
 
