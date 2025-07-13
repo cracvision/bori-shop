@@ -55,12 +55,12 @@ const getTagMap = async (): Promise<Map<number, string>> => {
 // FETCH PRINCIPAL: Siempre intenta Viator primero
 export const fetchAttractions = async (): Promise<Attraction[]> => {
     if (!API_KEY) {
-        // No hay API key (fallback)
-        console.warn("API_KEY environment variable not set. Returning mock data.");
+        console.warn("API_KEY environment variable not set. Usando mockData.");
         return mockAttractions;
     }
 
     try {
+        console.log("Intentando fetch de atracciones REALES desde Viator API...");
         const tagMap = await getTagMap();
         const searchBody = {
             filtering: { destination: "36" },
@@ -72,19 +72,24 @@ export const fetchAttractions = async (): Promise<Attraction[]> => {
         const searchResponse = await viatorApiRequest('POST', '/products/search', searchBody);
         const products = searchResponse.products || [];
 
+        if (!Array.isArray(products) || products.length === 0) {
+            console.warn("Viator API respondió pero no devolvió productos. Usando mockData.");
+            return mockAttractions;
+        }
+
         const attractions: Attraction[] = products.map((product: any) => {
             const productCategories = (product.tags || [])
                 .map((id: number) => tagMap.get(id))
                 .filter((name: string | undefined): name is string => !!name);
 
-            const imageUrl = product.images.find((img: any) => img.variant === 'HIGH_RESOLUTION')?.url
-                || product.images.find((img: any) => img.variant === 'MEDIUM_RESOLUTION')?.url
-                || product.images[0]?.url;
+            const imageUrl = product.images?.find((img: any) => img.variant === 'HIGH_RESOLUTION')?.url
+                || product.images?.find((img: any) => img.variant === 'MEDIUM_RESOLUTION')?.url
+                || product.images?.[0]?.url;
 
             return {
                 name: product.title,
                 description: product.description,
-                city: product.summary.primaryDestinationName || 'Puerto Rico',
+                city: product.summary?.primaryDestinationName || 'Puerto Rico',
                 image: imageUrl,
                 affiliateLink: `https://www.viator.com/${product.productUrl}?${AFFILIATE_PARAMS}`,
                 categories: productCategories,
@@ -92,11 +97,11 @@ export const fetchAttractions = async (): Promise<Attraction[]> => {
             };
         }).filter((attraction: Attraction) => attraction.image);
 
+        console.log(`✅ Recibiendo data REAL de Viator. Atracciones recibidas: ${attractions.length}`);
         return attractions;
 
     } catch (error) {
-        // SOLO si falla el fetch real, usa mock
-        console.error("Viator API error, using mockData:", error);
+        console.error("❌ ERROR al hacer fetch de Viator API. Usando mockData. Error:", error);
         return mockAttractions;
     }
 };
