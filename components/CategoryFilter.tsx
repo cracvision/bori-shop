@@ -9,14 +9,14 @@ interface CategoryFilterProps {
 const CategoryFilter: React.FC<CategoryFilterProps> = ({ categories, selectedCategories, onCategoryChange }) => {
     return (
         <div className="w-full mx-auto">
-             <h3 className="text-2xl font-bold text-white mb-4">Filtra por Categoría:</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">Filtra por Categoría:</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
                 {categories.map(category => {
                     const isSelected = selectedCategories.includes(category);
                     return (
-                        <label 
-                            key={category} 
-                            htmlFor={category} 
+                        <label
+                            key={category}
+                            htmlFor={category}
                             className="flex items-center space-x-3 cursor-pointer group transition-all duration-200 p-2 -ml-2 rounded-lg hover:bg-white/10"
                         >
                             <input

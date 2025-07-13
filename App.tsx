@@ -1,53 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AttractionCard from './components/AttractionCard';
 import CategoryFilter from './components/CategoryFilter';
 import LoadingSpinner from './components/LoadingSpinner';
-
-// Usa mock data local para evitar el fetch hasta que confirmes que todo se ve bien
-const mockAttractions = [
-    {
-        name: "Excursión de Kayak Bioluminiscente",
-        description: "Vive una experiencia mágica en la bahía bioluminiscente de Fajardo.",
-        city: "Fajardo",
-        image: "https://media.tacdn.com/media/attractions-splice-spp-674x446/06/74/cf/c1.jpg",
-        affiliateLink: "#",
-        categories: ["Kayak", "Bioluminiscencia / Bio Bay"],
-        productCode: "EXKAYAK01"
-    },
-    {
-        name: "Tour ATV en El Yunque",
-        description: "Explora la selva tropical en un recorrido lleno de adrenalina.",
-        city: "Río Grande",
-        image: "https://media.tacdn.com/media/attractions-splice-spp-674x446/07/6e/d0/c3.jpg",
-        affiliateLink: "#",
-        categories: ["ATV / UTV / Can-Am", "Senderismo / Hiking"],
-        productCode: "ATVYUNQUE02"
-    }
-    // Puedes añadir más mock data aquí...
-];
-
-const ALL_CATEGORIES = [
-    "Kayak",
-    "ATV / UTV / Can-Am",
-    "Cabalgata / Paseos a Caballo",
-    "Zipline / Canopy",
-    "Senderismo / Hiking",
-    "Tobogán Natural / Waterslide",
-    "Snorkel",
-    "Buceo / Scuba Diving",
-    "Catamarán / Paseo en Barco / Lancha",
-    "Flyboarding",
-    "Tours de Playa",
-    "Tour de Cueva / Cascada / Río",
-    "Bioluminiscencia / Bio Bay",
-    "Picnic / Relax en isla",
-    "Sailing / Vela",
-    "Combo Tour / Multi-aventura"
-];
+import { fetchAttractions } from './services/viatorService';
+import type { Attraction } from './types';
 
 const App: React.FC = () => {
+    const [attractions, setAttractions] = useState<Attraction[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-    const [isLoading] = useState<boolean>(false);
+    const [allCategories, setAllCategories] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const loadAttractions = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await fetchAttractions();
+            setAttractions(data);
+
+            // Saca todas las categorías únicas (dinámicamente)
+            const categorySet = new Set<string>();
+            data.forEach(attr => (attr.categories || []).forEach(cat => categorySet.add(cat)));
+            setAllCategories(Array.from(categorySet).sort());
+        } catch (e) {
+            setAttractions([]);
+            setAllCategories([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadAttractions();
+    }, [loadAttractions]);
 
     const handleCategoryChange = (category: string) => {
         setSelectedCategories(prev =>
@@ -58,8 +42,8 @@ const App: React.FC = () => {
     };
 
     const filteredAttractions = selectedCategories.length === 0
-        ? mockAttractions
-        : mockAttractions.filter(attraction =>
+        ? attractions
+        : attractions.filter(attraction =>
             attraction.categories && attraction.categories.some(cat => selectedCategories.includes(cat))
         );
 
@@ -77,7 +61,7 @@ const App: React.FC = () => {
             );
         }
         return (
-             <div className="text-center py-10">
+            <div className="text-center py-10">
                 <p className="text-xl text-gray-300">No se encontraron atracciones con los filtros seleccionados.</p>
             </div>
         );
@@ -109,16 +93,16 @@ const App: React.FC = () => {
                 </header>
 
                 <div className="bg-black/5 rounded-2xl p-4 sm:p-8 border border-white/10 mb-8">
-                     <CategoryFilter
-                        categories={ALL_CATEGORIES}
+                    <CategoryFilter
+                        categories={allCategories}
                         selectedCategories={selectedCategories}
                         onCategoryChange={handleCategoryChange}
                     />
                 </div>
-                
+
                 <div className="bg-black/5 rounded-2xl p-4 sm:p-8 border border-white/10">
                     <h2 className="text-3xl font-bold text-white mb-6 border-b-2 border-purple-500/50 pb-3">
-                       Tours y Actividades Populares
+                        Tours y Actividades Populares
                     </h2>
                     {renderContent()}
                 </div>
@@ -132,4 +116,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
