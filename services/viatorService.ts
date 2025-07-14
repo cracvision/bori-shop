@@ -35,11 +35,12 @@ const viatorApiRequest = async (
   }
   const response = await fetch(`${API_BASE_URL}/${endpoint}`, config);
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({
-      message: 'Failed to parse error response.',
+    // Intentamos leer el cuerpo del error para obtener el mensaje de Viator
+    const errorData = await response.json().catch(() => ({ 
+      message: `Error fetching from API: ${response.statusText}` 
     }));
-    const apiErrorMessage =
-      errorData?.message || `Error from Viator API: ${response.statusText}`;
+    // Usamos el mensaje de error de Viator si existe
+    const apiErrorMessage = errorData?.message || `Unknown error from Viator API`;
     throw new Error(apiErrorMessage);
   }
   return response.json();
@@ -59,13 +60,13 @@ export const fetchAttractions = async (): Promise<Attraction[]> => {
   try {
     const tagMap = await getTagMap();
 
-    // La lógica final y correcta para la llamada a la API.
     const searchBody = {
       filtering: {
         destination: "36",
         productCodes: BORI_SHOP_PRODUCT_CODES
       },
-      sorting: { sort: 'TOP_SELLERS', order: 'DESCENDING' },
+      // --- LA CORRECCIÓN FINAL BASADA EN EL ERROR DE LA API ---
+      sorting: { sort: 'RECOMMENDED', order: 'DESCENDING' },
       currency: 'USD',
     };
 
@@ -75,12 +76,10 @@ export const fetchAttractions = async (): Promise<Attraction[]> => {
       searchBody
     );
 
-    console.log('Respuesta final de la API:', searchResponse);
-
     const products = searchResponse.products || [];
 
     if (!Array.isArray(products) || products.length === 0) {
-      console.log('La API de Viator no devolvió productos para los códigos especificados.');
+      console.log('La API de Viator respondió pero no devolvió productos.');
       return [];
     }
 
